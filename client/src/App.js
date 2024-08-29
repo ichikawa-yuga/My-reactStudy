@@ -1,49 +1,36 @@
-import React, { useState } from "react";
-import './App.css';
-import useCategories from "./hooks/useCategories";
-import Axios from 'axios';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import Auth from './Auth';
+import TaskList from './TaskList';
+import TaskForm from './TaskForm';
 
-function App() {
-    // ユーザー入力を管理するための状態を定義
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
+// プライベートルートコンポーネント
+const PrivateRoute = ({ element: Component, ...rest }) => {
+    const token = localStorage.getItem('token');
+    return token ? <Component {...rest} /> : <Navigate to="/login" />;
+};
 
-    // カスタムフックからカテゴリーリストとリフレッシュ関数を取得
-    const { categoryList, refreshCategories } = useCategories();
-
-    // 新しいユーザーを追加する関数
-    const addUser = () => {
-        Axios.post("http://localhost:3001/api/insert/user", {
-            name: name, // 入力された名前
-            email: email // 入力されたメールアドレス
-        }).then(() => {
-            alert("User added successfully"); // 成功時のメッセージ
-            refreshCategories();  // カテゴリーリストを更新
-        }).catch(err => {
-            console.error("Error adding user: ", err); // エラーが発生した場合のコンソール出力
-            alert("Failed to add user"); // エラーメッセージを表示
-        });
-    };
-
+// メインAppコンポーネント
+const App = () => {
     return (
-        <div className="App">
-            {/* ユーザー入力用のテキストボックス */}
-            <div className="textBox">
-                <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} /><br />
-                <input type="text" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} /><br />
-                <button onClick={addUser}>Add User</button> {/* ボタンクリックでユーザー追加 */}
-            </div>
-            {/* ユーザーリストを表示 */}
-            <ul>
-                {categoryList.map((val, index) => (
-                    <li key={index}>
-                        <span>名前:</span>{val.name}<br />
-                        <span>email:</span>{val.email}
-                    </li>
-                ))}
-            </ul>
-        </div>
+        <Router>
+            <Routes>
+                <Route path="/login" element={<Auth type="login" />} />
+                <Route path="/register" element={<Auth type="register" />} />
+                <Route
+                    path="/tasks"
+                    element={<PrivateRoute element={TaskList} />}
+                />
+                <Route
+                    path="/task-form"
+                    element={<PrivateRoute element={TaskForm} />}
+                />
+                <Route path="/" element={<Navigate to="/login" />} />
+            </Routes>
+        </Router>
     );
-}
+};
 
-export default App; // このコンポーネントをエクスポート
+export default App;
+
+
