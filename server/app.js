@@ -1,4 +1,3 @@
-// pushテスト
 // 必要なモジュールをインポート
 const express = require("express");
 const cors = require("cors");
