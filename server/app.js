@@ -1,3 +1,4 @@
+// pushテスト
 // 必要なモジュールをインポート
 const express = require("express");
 const cors = require("cors");
@@ -9,7 +10,7 @@ const db = mysql.createPool({
   host: "localhost", // データベースのホスト名
   user: "root", // データベースのユーザー名
   password: "rootroot", // データベースのパスワード
-  database: "express_db" // 使用するデータベースの名前
+  database: "express_d" // 使用するデータベースの名前
 });
 
 // ミドルウェアを設定
