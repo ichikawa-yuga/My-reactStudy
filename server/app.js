@@ -149,6 +149,45 @@ app.delete('/tasks/:id', authenticate, (req, res) => {
   });
 });
 
+// タスク詳細取得ルート
+app.get('/tasks/:id', authenticate, (req, res) => {
+  db.query('SELECT * FROM tasks WHERE id = ? AND user_id = ?', [req.params.id, req.user.id], (err, results) => {
+      if (err) {
+          console.error('Error fetching task:', err);
+          return res.status(500).send('Server error');
+      }
+      if (results.length === 0) {
+          return res.status(404).send('Task not found');
+      }
+      res.status(200).json(results[0]);
+  });
+});
+
+// コメント取得ルート
+app.get('/comments/:task_id', authenticate, (req, res) => {
+  db.query('SELECT comments.*, users.username FROM comments JOIN users ON comments.user_id = users.id WHERE comments.task_id = ?', [req.params.task_id], (err, results) => {
+      if (err) {
+          console.error('Error fetching comments:', err);
+          return res.status(500).send('Server error');
+      }
+      console.log('Fetched comments:', results);
+      res.status(200).json(results);
+  });
+});
+
+// コメント追加ルート
+app.post('/comments', authenticate, (req, res) => {
+  const { task_id, comment } = req.body;
+  db.query('INSERT INTO comments (task_id, user_id, comment) VALUES (?, ?, ?)', [task_id, req.user.id, comment], (err, result) => {
+      if (err) {
+          console.error('Error adding comment:', err);
+          return res.status(500).send('Server error');
+      }
+      console.log('Comment added:', result);
+      res.status(201).send('Comment added');
+  });
+});
+
 // エラーハンドリングミドルウェア
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
