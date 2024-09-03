@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const TaskForm = ({ task, onSave }) => {
-    const [formData, setFormData] = useState({ title: '', description: '' });
+    const [formData, setFormData] = useState({ title: '', description: '', priority: 'low' });
     const token = localStorage.getItem('token');
 
     useEffect(() => {
         if (task) {
-            setFormData({ title: task.title, description: task.description });
+            setFormData({ title: task.title, description: task.description, priority: task.priority });
         }
     }, [task]);
 
@@ -49,6 +49,16 @@ const TaskForm = ({ task, onSave }) => {
                     onChange={handleChange}
                     placeholder="Description"
                 />
+                <select
+                    name="priority"
+                    value={formData.priority}
+                    onChange={handleChange}
+                    required
+                >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
                 <button type="submit">Save</button>
             </form>
         </div>

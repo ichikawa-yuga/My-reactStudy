@@ -104,7 +104,7 @@ const authenticate = (req, res, next) => {
 
 // タスク取得ルート
 app.get('/tasks', authenticate, (req, res) => {
-  db.query('SELECT * FROM tasks WHERE user_id = ?', [req.user.id], (err, results) => {
+  db.query('SELECT * FROM tasks WHERE user_id = ? ORDER BY FIELD(priority, "high", "medium", "low")', [req.user.id], (err, results) => {
       if (err) {
           console.error('Error fetching tasks:', err);
           return res.status(500).send('Server error');
@@ -115,8 +115,8 @@ app.get('/tasks', authenticate, (req, res) => {
 });
 // タスク作成ルート
 app.post('/tasks', authenticate, (req, res) => {
-  const { title, description, due_date } = req.body;
-  db.query('INSERT INTO tasks (user_id, title, description, due_date) VALUES (?, ?, ?, ?)', [req.user.id, title, description, due_date], (err, result) => {
+  const { title, description, due_date, priority } = req.body;
+  db.query('INSERT INTO tasks (user_id, title, description, due_date, priority) VALUES (?, ?, ?, ?, ?)', [req.user.id, title, description, due_date, priority], (err, result) => {
       if (err) {
           console.error('Error creating task:', err);
           return res.status(500).send('Server error');
@@ -125,11 +125,10 @@ app.post('/tasks', authenticate, (req, res) => {
       res.status(201).send('Task created');
   });
 });
-
 // タスク編集ルート
 app.put('/tasks/:id', authenticate, (req, res) => {
-  const { title, description, due_date, status } = req.body;
-  db.query('UPDATE tasks SET title = ?, description = ?, due_date = ?, status = ? WHERE id = ? AND user_id = ?', [title, description, due_date, status, req.params.id, req.user.id], (err, result) => {
+  const { title, description, due_date, status, priority } = req.body;
+  db.query('UPDATE tasks SET title = ?, description = ?, due_date = ?, status = ?, priority = ? WHERE id = ? AND user_id = ?', [title, description, due_date, status, priority, req.params.id, req.user.id], (err, result) => {
       if (err) {
           console.error('Error updating task:', err);
           return res.status(500).send('Server error');
@@ -138,7 +137,6 @@ app.put('/tasks/:id', authenticate, (req, res) => {
       res.status(200).send('Task updated');
   });
 });
-
 // タスク削除ルート
 app.delete('/tasks/:id', authenticate, (req, res) => {
   db.query('DELETE FROM tasks WHERE id = ? AND user_id = ?', [req.params.id, req.user.id], (err, result) => {

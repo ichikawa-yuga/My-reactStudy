@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const TaskList = ({ onEdit }) => {
     const [tasks, setTasks] = useState([]);
+    const [sorted, setSorted] = useState(false);
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -27,14 +28,28 @@ const TaskList = ({ onEdit }) => {
         }
     };
 
+    const sortTasks = () => {
+        setSorted(!sorted);
+        setTasks(prevTasks =>
+            [...prevTasks].sort((a, b) => {
+                const priorities = { 'high': 3, 'medium': 2, 'low': 1 };
+                return sorted ? priorities[b.priority] - priorities[a.priority] : priorities[a.priority] - priorities[b.priority];
+            })
+        );
+    };
+
     return (
         <div>
             <h2>Task List</h2>
+            <button onClick={sortTasks}>
+                {sorted ? 'Sort by Default' : 'Sort by Priority'}
+            </button>
             <ul>
                 {tasks.map(task => (
                     <li key={task.id}>
                         <h3>{task.title}</h3>
                         <p>{task.description}</p>
+                        <p>Priority: {task.priority}</p>
                         <button onClick={() => onEdit(task)}>Edit</button>
                         <button onClick={() => handleDelete(task.id)}>Delete</button>
                     </li>
