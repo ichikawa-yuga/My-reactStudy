@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const TaskList = ({ onEdit }) => {
     const [tasks, setTasks] = useState([]);
     const [sorted, setSorted] = useState(false);
     const token = localStorage.getItem('token');
+    const navigate = useNavigate(); // React RouterのuseNavigateフックを使用
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -42,6 +44,7 @@ const TaskList = ({ onEdit }) => {
         console.log('Editing task:', task);
         if (typeof onEdit === 'function') {
             onEdit(task);
+            navigate('/task-form'); // 編集画面に遷移
         } else {
             console.error('onEdit is not a function');
         }

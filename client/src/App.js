@@ -5,29 +5,29 @@ import TaskList from './TaskList';
 import TaskForm from './TaskForm';
 
 const App = () => {
-    const [editingTask, setEditingTask] = useState(null);
+  const [editingTask, setEditingTask] = useState(null);
 
-    const handleEditTask = (task) => {
-        setEditingTask(task);
-    };
+  const handleEditTask = (task) => {
+      setEditingTask(task);
+  };
 
-    return (
-        <Router>
-            <Routes>
-                <Route path="/login" element={<Auth type="login" />} />
-                <Route path="/register" element={<Auth type="register" />} />
-                <Route 
-                    path="/tasks" 
-                    element={<TaskList onEdit={handleEditTask} />} 
-                />
-                <Route 
-                    path="/task-form" 
-                    element={<TaskForm task={editingTask} onSave={() => setEditingTask(null)} />} 
-                />
-                <Route path="/" element={<Navigate to="/login" />} />
-            </Routes>
-        </Router>
-    );
+  return (
+      <Router>
+          <Routes>
+              <Route path="/login" element={<Auth type="login" />} />
+              <Route path="/register" element={<Auth type="register" />} />
+              <Route 
+                  path="/tasks" 
+                  element={<TaskList onEdit={handleEditTask} />} 
+              />
+              <Route 
+                  path="/task-form" 
+                  element={<TaskForm task={editingTask} onSave={() => setEditingTask(null)} />} 
+              />
+              <Route path="/" element={<Navigate to="/login" />} />
+          </Routes>
+      </Router>
+  );
 };
 
 export default App;
