@@ -38,6 +38,15 @@ const TaskList = ({ onEdit }) => {
         );
     };
 
+    const handleEditClick = (task) => {
+        console.log('Editing task:', task);
+        if (typeof onEdit === 'function') {
+            onEdit(task);
+        } else {
+            console.error('onEdit is not a function');
+        }
+    };
+
     return (
         <div>
             <h2>Task List</h2>
@@ -50,7 +59,7 @@ const TaskList = ({ onEdit }) => {
                         <h3>{task.title}</h3>
                         <p>{task.description}</p>
                         <p>Priority: {task.priority}</p>
-                        <button onClick={() => onEdit(task)}>Edit</button>
+                        <button onClick={() => handleEditClick(task)}>Edit</button>
                         <button onClick={() => handleDelete(task.id)}>Delete</button>
                     </li>
                 ))}
