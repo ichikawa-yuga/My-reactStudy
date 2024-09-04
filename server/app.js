@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
 app.use(bodyParser.json());
@@ -44,6 +46,7 @@ app.post('/register', async (req, res) => {
       res.status(500).send('Server error');
   }
 });
+
 // ユーザーログインルート
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
@@ -80,6 +83,7 @@ app.post('/login', async (req, res) => {
       }
   });
 });
+
 // 認証ミドルウェア
 const authenticate = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -113,6 +117,7 @@ app.get('/tasks', authenticate, (req, res) => {
       res.status(200).json(results);
   });
 });
+
 // タスク作成ルート
 app.post('/tasks', authenticate, (req, res) => {
   const { title, description, due_date, priority } = req.body;
@@ -125,6 +130,7 @@ app.post('/tasks', authenticate, (req, res) => {
       res.status(201).send('Task created');
   });
 });
+
 // タスク編集ルート
 app.put('/tasks/:id', authenticate, (req, res) => {
   const { title, description, due_date, status, priority } = req.body;
@@ -137,6 +143,7 @@ app.put('/tasks/:id', authenticate, (req, res) => {
       res.status(200).send('Task updated');
   });
 });
+
 // タスク削除ルート
 app.delete('/tasks/:id', authenticate, (req, res) => {
   db.query('DELETE FROM tasks WHERE id = ? AND user_id = ?', [req.params.id, req.user.id], (err, result) => {
@@ -188,14 +195,53 @@ app.post('/comments', authenticate, (req, res) => {
   });
 });
 
-// エラーハンドリングミドルウェア
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).send('Server error');
+// ファイルストレージ設定
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // アップロードされたファイルを保存するディレクトリ
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // ファイル名にタイムスタンプを付ける
+    }
 });
 
+const upload = multer({ storage });
+
+// ファイルアップロードルート
+app.post('/tasks/:id/upload', authenticate, upload.single('file'), (req, res) => {
+    const taskId = req.params.id;
+    const file = req.file;
+    if (!file) {
+        return res.status(400).send('No file uploaded');
+    }
+    db.query('INSERT INTO task_files (task_id, file_path) VALUES (?, ?)', [taskId, file.path], (err, result) => {
+        if (err) {
+            console.error('Error saving file info:', err);
+            return res.status(500).send('Server error');
+        }
+        res.status(201).send('File uploaded');
+    });
+});
+
+// ファイルダウンロードルート
+app.get('/tasks/:id/files/:filename', (req, res) => {
+    const { filename } = req.params;
+    const filePath = path.join(__dirname, 'uploads', filename);
+    res.sendFile(filePath);
+});
+
+// タスクに関連するファイルのリスト取得ルート
+app.get('/tasks/:id/files', authenticate, (req, res) => {
+    const taskId = req.params.id;
+    db.query('SELECT * FROM task_files WHERE task_id = ?', [taskId], (err, results) => {
+        if (err) {
+            console.error('Error fetching files:', err);
+            return res.status(500).send('Server error');
+        }
+        res.status(200).json(results);
+    });
+});
 
 app.listen(3001, () => {
     console.log('Server running on port 3001');
 });
-

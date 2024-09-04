@@ -3,10 +3,12 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
 const TaskDetail = () => {
-    const { id } = useParams(); // URL パラメータから id を取得
+    const { id } = useParams();
     const [task, setTask] = useState(null);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
+    const [files, setFiles] = useState([]);
+    const [selectedFile, setSelectedFile] = useState(null);
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -28,8 +30,18 @@ const TaskDetail = () => {
             }
         };
 
+        const fetchFiles = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3001/tasks/${id}/files`, { headers: { Authorization: `Bearer ${token}` } });
+                setFiles(response.data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
         fetchTaskDetails();
         fetchComments();
+        fetchFiles();
     }, [id, token]);
 
     const handleCommentChange = (e) => {
@@ -48,17 +60,35 @@ const TaskDetail = () => {
         }
     };
 
+    const handleFileChange = (e) => {
+        setSelectedFile(e.target.files[0]);
+    };
+
+    const handleFileUpload = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        try {
+            await axios.post(`http://localhost:3001/tasks/${id}/upload`, formData, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } });
+            setSelectedFile(null);
+            const response = await axios.get(`http://localhost:3001/tasks/${id}/files`, { headers: { Authorization: `Bearer ${token}` } });
+            setFiles(response.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     if (!task) {
         return <div>Loading...</div>;
     }
 
     return (
         <div>
-            <h2>Task Detail</h2>
+            <h2>タスク詳細</h2>
             <h3>{task.title}</h3>
             <p>{task.description}</p>
-            <p>Priority: {task.priority}</p>
-            <h3>Comments</h3>
+            <p>優先度: {task.priority}</p>
+            <h3>コメント</h3>
             <ul>
                 {comments.map(comment => (
                     <li key={comment.id}>
@@ -70,11 +100,23 @@ const TaskDetail = () => {
                 <textarea
                     value={newComment}
                     onChange={handleCommentChange}
-                    placeholder="Add a comment"
+                    placeholder="コメントを追加"
                     required
                 />
-                <button type="submit">Add Comment</button>
+                <button type="submit">コメントを追加</button>
             </form>
+            <h3>ファイル</h3>
+            <form onSubmit={handleFileUpload}>
+                <input type="file" onChange={handleFileChange} required />
+                <button type="submit">ファイルをアップロード</button>
+            </form>
+            <ul>
+                {files.map(file => (
+                    <li key={file.id}>
+                        <a href={`http://localhost:3001/tasks/${id}/files/${file.file_path}`} download>{file.file_path}</a>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 };
