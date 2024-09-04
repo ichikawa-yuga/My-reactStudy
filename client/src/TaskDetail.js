@@ -66,6 +66,11 @@ const TaskDetail = () => {
 
     const handleFileUpload = async (e) => {
         e.preventDefault();
+        if (!selectedFile) {
+            alert('No file selected.');
+            return;
+        }
+
         const formData = new FormData();
         formData.append('file', selectedFile);
         try {
@@ -74,7 +79,7 @@ const TaskDetail = () => {
             const response = await axios.get(`http://localhost:3001/tasks/${id}/files`, { headers: { Authorization: `Bearer ${token}` } });
             setFiles(response.data);
         } catch (err) {
-            console.error(err);
+            console.error('Error uploading file:', err);
         }
     };
 

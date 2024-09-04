@@ -197,9 +197,11 @@ app.post('/comments', authenticate, (req, res) => {
 
 // ファイルストレージ設定
 const storage = multer.diskStorage({
+    // ファイルの保存先ディレクトリ
     destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // アップロードされたファイルを保存するディレクトリ
+        cb(null, path.join(__dirname, 'uploads')); // uploads フォルダにファイルを保存
     },
+    // ファイル名の設定
     filename: (req, file, cb) => {
         cb(null, Date.now() + path.extname(file.originalname)); // ファイル名にタイムスタンプを付ける
     }
@@ -209,12 +211,16 @@ const upload = multer({ storage });
 
 // ファイルアップロードルート
 app.post('/tasks/:id/upload', authenticate, upload.single('file'), (req, res) => {
-    const taskId = req.params.id;
-    const file = req.file;
-    if (!file) {
-        return res.status(400).send('No file uploaded');
+    // req.file にアップロードされたファイル情報が含まれる
+    if (!req.file) {
+        return res.status(400).send('No file uploaded.');
     }
-    db.query('INSERT INTO task_files (task_id, file_path) VALUES (?, ?)', [taskId, file.path], (err, result) => {
+
+    // データベースにファイル情報を保存する処理
+    const filePath = req.file.filename;
+    const taskId = req.params.id;
+    
+    db.query('INSERT INTO task_files (task_id, file_path) VALUES (?, ?)', [taskId, filePath], (err, result) => {
         if (err) {
             console.error('Error saving file info:', err);
             return res.status(500).send('Server error');
