@@ -5,28 +5,12 @@ import { useParams } from 'react-router-dom';
 const TaskForm = ({ onSave }) => {
   const [formData, setFormData] = useState({ title: '', description: '', priority: 'low', tags: [] });
   const [tags, setTags] = useState([]);
-  const [loading, setLoading] = useState(true); // ローディング状態
-  const [error, setError] = useState(null); // エラー状態
   const token = localStorage.getItem('token');
-  const { id } = useParams(); // URL パラメータから ID を取得
+  const { id } = useParams(); // URLパラメータからIDを取得
 
   useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/tags', { headers: { Authorization: `Bearer ${token}` } });
-        setTags(response.data);
-      } catch (err) {
-        setError('Failed to fetch tags.');
-        console.error('Error fetching tags:', err);
-      }
-    };
-
-    fetchTags();
-  }, [token]);
-
-  useEffect(() => {
-    const fetchTask = async () => {
-      if (id) {
+    if (id) {
+      const fetchTask = async () => {
         try {
           const response = await axios.get(`http://localhost:3001/tasks/${id}`, { headers: { Authorization: `Bearer ${token}` } });
           setFormData({
@@ -35,19 +19,27 @@ const TaskForm = ({ onSave }) => {
             priority: response.data.priority,
             tags: response.data.tags || []
           });
-          setLoading(false); // データの取得が完了
         } catch (err) {
-          setError('Failed to fetch task.');
-          console.error('Error fetching task:', err);
-          setLoading(false); // データ取得失敗時にもローディングを解除
+          console.error('Error fetching task for edit:', err);
         }
-      } else {
-        setLoading(false); // ID がない場合は即座にローディングを解除
+      };
+
+      fetchTask();
+    }
+  }, [id, token]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/tags', { headers: { Authorization: `Bearer ${token}` } });
+        setTags(response.data);
+      } catch (err) {
+        console.error('Error fetching tags:', err);
       }
     };
 
-    fetchTask();
-  }, [id, token]);
+    fetchTags();
+  }, [token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -72,18 +64,9 @@ const TaskForm = ({ onSave }) => {
       }
       onSave();
     } catch (err) {
-      setError('Failed to save task.');
       console.error('Error saving task:', err);
     }
   };
-
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
 
   return (
     <div>

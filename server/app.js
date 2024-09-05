@@ -248,6 +248,85 @@ app.get('/tasks/:id/files', authenticate, (req, res) => {
     });
 });
 
+// タグを取得するルート
+app.get('/tags', authenticate, (req, res) => {
+  db.query('SELECT * FROM tags', (err, results) => {
+    if (err) {
+      console.error('Error fetching tags:', err);
+      return res.status(500).send('Server error');
+    }
+    res.status(200).json(results);
+  });
+});
+
+// タグを追加するルート
+app.post('/tags', authenticate, (req, res) => {
+  const { name } = req.body;
+  db.query('INSERT INTO tags (name) VALUES (?)', [name], (err, result) => {
+    if (err) {
+      console.error('Error adding tag:', err);
+      return res.status(500).send('Server error');
+    }
+    res.status(201).send('Tag added');
+  });
+});
+
+// タグを削除するルート
+app.delete('/tags/:id', authenticate, (req, res) => {
+  db.query('DELETE FROM tags WHERE id = ?', [req.params.id], (err, result) => {
+    if (err) {
+      console.error('Error deleting tag:', err);
+      return res.status(500).send('Server error');
+    }
+    res.status(200).send('Tag deleted');
+  });
+});
+
+// タスクをタグでフィルタリングするルート
+app.get('/tasks', authenticate, (req, res) => {
+  const { tag_id } = req.query;
+  let query = 'SELECT t.* FROM tasks t';
+  const params = [req.user.id];
+
+  if (tag_id) {
+    query += ' JOIN task_tags tt ON t.id = tt.task_id WHERE tt.tag_id = ? AND t.user_id = ?';
+    params.unshift(tag_id);
+  } else {
+    query += ' WHERE t.user_id = ?';
+  }
+
+  db.query(query, params, (err, results) => {
+    if (err) {
+      console.error('Error fetching tasks:', err);
+      return res.status(500).send('Server error');
+    }
+    res.status(200).json(results);
+  });
+});
+
+// タスクにタグを追加するルート
+app.post('/tasks/:id/tags', authenticate, (req, res) => {
+  const { tag_id } = req.body;
+  db.query('INSERT INTO task_tags (task_id, tag_id) VALUES (?, ?)', [req.params.id, tag_id], (err, result) => {
+    if (err) {
+      console.error('Error adding tag to task:', err);
+      return res.status(500).send('Server error');
+    }
+    res.status(201).send('Tag added to task');
+  });
+});
+
+// タスクからタグを削除するルート
+app.delete('/tasks/:id/tags/:tag_id', authenticate, (req, res) => {
+  db.query('DELETE FROM task_tags WHERE task_id = ? AND tag_id = ?', [req.params.id, req.params.tag_id], (err, result) => {
+    if (err) {
+      console.error('Error removing tag from task:', err);
+      return res.status(500).send('Server error');
+    }
+    res.status(200).send('Tag removed from task');
+  });
+});
+
 app.listen(3001, () => {
     console.log('Server running on port 3001');
 });
