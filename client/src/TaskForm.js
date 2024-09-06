@@ -29,11 +29,12 @@ const TaskForm = ({ onSave }) => {
       if (id) {
         try {
           const response = await axios.get(`http://localhost:3001/tasks/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+          const taskData = response.data;
           setFormData({
-            title: response.data.title,
-            description: response.data.description,
-            priority: response.data.priority,
-            tags: response.data.tags || []
+            title: taskData.title || '',
+            description: taskData.description || '',
+            priority: taskData.priority || 'low',
+            tags: taskData.tags ? taskData.tags.map(tag => tag.id) : []  // タグIDの配列をセット
           });
           setLoading(false);
         } catch (err) {
@@ -58,19 +59,34 @@ const TaskForm = ({ onSave }) => {
     const { options } = e.target;
     const selectedTags = Array.from(options)
       .filter(option => option.selected)
-      .map(option => option.value);
+      .map(option => parseInt(option.value, 10)); // タグIDを数値に変換
     setFormData({ ...formData, tags: selectedTags });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (id) {
-        await axios.put(`http://localhost:3001/tasks/${id}`, formData, { headers: { Authorization: `Bearer ${token}` } });
-      } else {
-        await axios.post('http://localhost:3001/tasks', formData, { headers: { Authorization: `Bearer ${token}` } });
+      const updatedData = {
+        title: formData.title,
+        description: formData.description,
+        priority: formData.priority,
+        tags: formData.tags  // タグIDの配列をそのまま送信
+      };
+
+      const url = id ? `http://localhost:3001/tasks/${id}` : 'http://localhost:3001/tasks';
+      const method = id ? 'put' : 'post';
+
+      const response = await axios({
+        method,
+        url,
+        data: updatedData,
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      console.log('Response:', response); // レスポンスをログに出力
+      if (onSave && typeof onSave === 'function') {
+        onSave(); // タスク保存後に onSave 関数を呼び出す
       }
-      onSave();
     } catch (err) {
       setError('Failed to save task.');
       console.error('Error saving task:', err);

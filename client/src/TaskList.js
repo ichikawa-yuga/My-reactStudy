@@ -106,7 +106,7 @@ const TaskList = () => {
             <h3>{task.title}</h3>
             <p>{task.description}</p>
             <p>Priority: {task.priority}</p>
-            <p>Tags: {(task.tags || []).join(', ')}</p> {/* 修正点 */}
+            <p>Tags: {(task.tags || []).join(', ')}</p>
             <button onClick={() => handleEditClick(task)}>Edit</button>
             <button onClick={() => handleViewDetails(task)}>View Details</button>
             <button onClick={() => handleDelete(task.id)}>Delete</button>

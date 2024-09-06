@@ -108,13 +108,23 @@ const authenticate = (req, res, next) => {
 
 // タスク取得ルート
 app.get('/tasks', authenticate, (req, res) => {
-  db.query('SELECT * FROM tasks WHERE user_id = ? ORDER BY FIELD(priority, "high", "medium", "low")', [req.user.id], (err, results) => {
-      if (err) {
-          console.error('Error fetching tasks:', err);
-          return res.status(500).send('Server error');
-      }
-      console.log('Fetched tasks:', results);
-      res.status(200).json(results);
+  const { tag_id } = req.query;
+  let query = 'SELECT t.* FROM tasks t';
+  const params = [req.user.id];
+
+  if (tag_id) {
+    query += ' JOIN task_tags tt ON t.id = tt.task_id WHERE tt.tag_id = ? AND t.user_id = ?';
+    params.unshift(tag_id);
+  } else {
+    query += ' WHERE t.user_id = ?';
+  }
+
+  db.query(query, params, (err, results) => {
+    if (err) {
+      console.error('Error fetching tasks:', err);
+      return res.status(500).send('Server error');
+    }
+    res.status(200).json(results);
   });
 });
 
@@ -132,16 +142,53 @@ app.post('/tasks', authenticate, (req, res) => {
 });
 
 // タスク編集ルート
-app.put('/tasks/:id', authenticate, (req, res) => {
-  const { title, description, due_date, status, priority } = req.body;
-  db.query('UPDATE tasks SET title = ?, description = ?, due_date = ?, status = ?, priority = ? WHERE id = ? AND user_id = ?', [title, description, due_date, status, priority, req.params.id, req.user.id], (err, result) => {
-      if (err) {
-          console.error('Error updating task:', err);
-          return res.status(500).send('Server error');
-      }
-      console.log('Task updated:', result);
-      res.status(200).send('Task updated');
-  });
+app.put('/tasks/:id', authenticate, async (req, res) => {
+  const { title, description, due_date, status, priority, tags } = req.body;
+  const taskId = req.params.id;
+
+  try {
+    // タスクの更新
+    await new Promise((resolve, reject) => {
+      db.query(
+        'UPDATE tasks SET title = ?, description = ?, due_date = ?, status = ?, priority = ? WHERE id = ? AND user_id = ?',
+        [title, description, due_date, status, priority, taskId, req.user.id],
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        }
+      );
+    });
+
+    // タグの削除
+    await new Promise((resolve, reject) => {
+      db.query('DELETE FROM task_tags WHERE task_id = ?', [taskId], (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+
+    // タグの追加
+    if (tags && tags.length > 0) {
+      const tagQueries = tags.map(tagId => {
+        return new Promise((resolve, reject) => {
+          db.query(
+            'INSERT INTO task_tags (task_id, tag_id) VALUES (?, ?)',
+            [taskId, tagId],
+            (err, result) => {
+              if (err) return reject(err);
+              resolve(result);
+            }
+          );
+        });
+      });
+      await Promise.all(tagQueries);
+    }
+
+    res.status(200).send('Task updated');
+  } catch (err) {
+    console.error('Error updating task:', err);
+    res.status(500).send('Server error');
+  }
 });
 
 // タスク削除ルート
@@ -197,11 +244,9 @@ app.post('/comments', authenticate, (req, res) => {
 
 // ファイルストレージ設定
 const storage = multer.diskStorage({
-    // ファイルの保存先ディレクトリ
     destination: (req, file, cb) => {
         cb(null, path.join(__dirname, 'uploads')); // uploads フォルダにファイルを保存
     },
-    // ファイル名の設定
     filename: (req, file, cb) => {
         cb(null, Date.now() + path.extname(file.originalname)); // ファイル名にタイムスタンプを付ける
     }
@@ -211,12 +256,10 @@ const upload = multer({ storage });
 
 // ファイルアップロードルート
 app.post('/tasks/:id/upload', authenticate, upload.single('file'), (req, res) => {
-    // req.file にアップロードされたファイル情報が含まれる
     if (!req.file) {
         return res.status(400).send('No file uploaded.');
     }
 
-    // データベースにファイル情報を保存する処理
     const filePath = req.file.filename;
     const taskId = req.params.id;
     
@@ -279,28 +322,6 @@ app.delete('/tags/:id', authenticate, (req, res) => {
       return res.status(500).send('Server error');
     }
     res.status(200).send('Tag deleted');
-  });
-});
-
-// タスクをタグでフィルタリングするルート
-app.get('/tasks', authenticate, (req, res) => {
-  const { tag_id } = req.query;
-  let query = 'SELECT t.* FROM tasks t';
-  const params = [req.user.id];
-
-  if (tag_id) {
-    query += ' JOIN task_tags tt ON t.id = tt.task_id WHERE tt.tag_id = ? AND t.user_id = ?';
-    params.unshift(tag_id);
-  } else {
-    query += ' WHERE t.user_id = ?';
-  }
-
-  db.query(query, params, (err, results) => {
-    if (err) {
-      console.error('Error fetching tasks:', err);
-      return res.status(500).send('Server error');
-    }
-    res.status(200).json(results);
   });
 });
 
