@@ -50,6 +50,15 @@ const TaskList = () => {
     }
   };
 
+  const handleTagDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3001/tags/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      setTags(tags.filter(tag => tag.id !== id));
+    } catch (err) {
+      console.error('Error deleting tag:', err);
+    }
+  };
+
   const sortTasks = () => {
     setSorted(!sorted);
     setTasks(prevTasks =>
@@ -110,6 +119,15 @@ const TaskList = () => {
             <button onClick={() => handleEditClick(task)}>Edit</button>
             <button onClick={() => handleViewDetails(task)}>View Details</button>
             <button onClick={() => handleDelete(task.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+      <h3>Tags</h3>
+      <ul>
+        {tags.map(tag => (
+          <li key={tag.id}>
+            {tag.name}
+            <button onClick={() => handleTagDelete(tag.id)}>Delete</button>
           </li>
         ))}
       </ul>

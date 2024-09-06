@@ -316,12 +316,27 @@ app.post('/tags', authenticate, (req, res) => {
 
 // タグを削除するルート
 app.delete('/tags/:id', authenticate, (req, res) => {
-  db.query('DELETE FROM tags WHERE id = ?', [req.params.id], (err, result) => {
+  const tagId = req.params.id;
+
+  // タグがどのタスクにも関連付けられていないか確認
+  db.query('SELECT * FROM task_tags WHERE tag_id = ?', [tagId], (err, results) => {
     if (err) {
-      console.error('Error deleting tag:', err);
+      console.error('Error checking tag associations:', err);
       return res.status(500).send('Server error');
     }
-    res.status(200).send('Tag deleted');
+
+    if (results.length > 0) {
+      return res.status(400).send('Tag cannot be deleted because it is associated with tasks.');
+    }
+
+    // タグの削除
+    db.query('DELETE FROM tags WHERE id = ?', [tagId], (err, result) => {
+      if (err) {
+        console.error('Error deleting tag:', err);
+        return res.status(500).send('Server error');
+      }
+      res.status(200).send('Tag deleted');
+    });
   });
 });
 
