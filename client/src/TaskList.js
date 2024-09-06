@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import TagForm from './TagForm'; // TagForm をインポート
+import TagForm from './TagForm';
 
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
   const [tags, setTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState('');
-  const [showTagForm, setShowTagForm] = useState(false); // タグ追加フォームの表示制御
+  const [showTagForm, setShowTagForm] = useState(false);
   const [sorted, setSorted] = useState(false);
   const token = localStorage.getItem('token');
-  const navigate = useNavigate(); // React Router の useNavigate フックを使用
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -61,11 +61,11 @@ const TaskList = () => {
   };
 
   const handleEditClick = (task) => {
-    navigate(`/task-form/${task.id}`); // 編集画面に遷移
+    navigate(`/task-form/${task.id}`);
   };
 
   const handleViewDetails = (task) => {
-    navigate(`/task-detail/${task.id}`); // 詳細ページに遷移
+    navigate(`/task-detail/${task.id}`);
   };
 
   const toggleTagForm = () => {
@@ -73,7 +73,6 @@ const TaskList = () => {
   };
 
   const handleTagAdded = () => {
-    // タグが追加された後にタグリストを再取得
     const fetchTags = async () => {
       try {
         const response = await axios.get('http://localhost:3001/tags', { headers: { Authorization: `Bearer ${token}` } });
@@ -107,9 +106,10 @@ const TaskList = () => {
             <h3>{task.title}</h3>
             <p>{task.description}</p>
             <p>Priority: {task.priority}</p>
+            <p>Tags: {(task.tags || []).join(', ')}</p> {/* 修正点 */}
             <button onClick={() => handleEditClick(task)}>Edit</button>
-            <button onClick={() => handleDelete(task.id)}>Delete</button>
             <button onClick={() => handleViewDetails(task)}>View Details</button>
+            <button onClick={() => handleDelete(task.id)}>Delete</button>
           </li>
         ))}
       </ul>

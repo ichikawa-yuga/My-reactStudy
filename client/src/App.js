@@ -17,20 +17,16 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Auth type="login" />} />
         <Route path="/register" element={<Auth type="register" />} />
-        <Route 
-          path="/tasks" 
-          element={<TaskList onEdit={handleEditTask} />} 
-        />
+        <Route path="/tasks" element={<TaskList onEdit={handleEditTask} />} />
         <Route 
           path="/task-form" 
           element={<TaskForm task={editingTask} onSave={() => setEditingTask(null)} />} 
         />
         <Route 
-          path="/task-detail/:id"  // パラメータ付きルート
+          path="/task-detail/:id" 
           element={<TaskDetail />} 
         />
         <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/" element={<TaskList />} />
         <Route path="/task-form/:id" element={<TaskForm />} />
         <Route path="/task-detail/:id" element={<TaskDetail />} />
       </Routes>

@@ -5,10 +5,10 @@ import { useParams } from 'react-router-dom';
 const TaskForm = ({ onSave }) => {
   const [formData, setFormData] = useState({ title: '', description: '', priority: 'low', tags: [] });
   const [tags, setTags] = useState([]);
-  const [loading, setLoading] = useState(true); // ローディング状態
-  const [error, setError] = useState(null); // エラー状態
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const token = localStorage.getItem('token');
-  const { id } = useParams(); // URL パラメータから ID を取得
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -35,14 +35,14 @@ const TaskForm = ({ onSave }) => {
             priority: response.data.priority,
             tags: response.data.tags || []
           });
-          setLoading(false); // データの取得が完了
+          setLoading(false);
         } catch (err) {
           setError('Failed to fetch task.');
           console.error('Error fetching task:', err);
-          setLoading(false); // データ取得失敗時にもローディングを解除
+          setLoading(false);
         }
       } else {
-        setLoading(false); // ID がない場合は即座にローディングを解除
+        setLoading(false);
       }
     };
 
