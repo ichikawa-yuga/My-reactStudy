@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import './TaskDetail.css'; // CSS ファイルをインポート
 
 const TaskDetail = () => {
     const { id } = useParams();
@@ -88,41 +89,41 @@ const TaskDetail = () => {
     }
 
     return (
-        <div>
-            <h2>タスク詳細</h2>
-            <h3>{task.title}</h3>
-            <p>{task.description}</p>
-            <p>優先度: {task.priority}</p>
-            <h3>コメント</h3>
-            <ul>
-                {comments.map(comment => (
-                    <li key={comment.id}>
-                        <strong>{comment.username}:</strong> {comment.comment} <em>({new Date(comment.created_at).toLocaleString()})</em>
-                    </li>
-                ))}
-            </ul>
-            <form onSubmit={handleCommentSubmit}>
-                <textarea
-                    value={newComment}
-                    onChange={handleCommentChange}
-                    placeholder="コメントを追加"
-                    required
-                />
-                <button type="submit">コメントを追加</button>
-            </form>
-            <h3>ファイル</h3>
-            <form onSubmit={handleFileUpload}>
-                <input type="file" onChange={handleFileChange} required />
-                <button type="submit">ファイルをアップロード</button>
-            </form>
-            <ul>
-                {files.map(file => (
-                    <li key={file.id}>
-                        <a href={`http://localhost:3001/tasks/${id}/files/${file.file_path}`} download>{file.file_path}</a>
-                    </li>
-                ))}
-            </ul>
-        </div>
+      <div className="task-detail-container">
+      <h2>タスク詳細</h2>
+      <h3>{task.title}</h3>
+      <p>{task.description}</p>
+      <p>優先度: {task.priority}</p>
+      <h3>コメント</h3>
+      <ul>
+          {comments.map(comment => (
+              <li key={comment.id}>
+                  <strong>{comment.username}:</strong> {comment.comment} <em>({new Date(comment.created_at).toLocaleString()})</em>
+              </li>
+          ))}
+      </ul>
+      <form onSubmit={handleCommentSubmit}>
+          <textarea
+              value={newComment}
+              onChange={handleCommentChange}
+              placeholder="コメントを追加"
+              required
+          />
+          <button type="submit">コメントを追加</button>
+      </form>
+      <h3>ファイル</h3>
+      <form onSubmit={handleFileUpload}>
+          <input type="file" onChange={handleFileChange} required />
+          <button type="submit">ファイルをアップロード</button>
+      </form>
+      <ul>
+          {files.map(file => (
+              <li key={file.id}>
+                  <a href={`http://localhost:3001/tasks/${id}/files/${file.file_path}`} download>{file.file_path}</a>
+              </li>
+          ))}
+      </ul>
+  </div>
     );
 };
 

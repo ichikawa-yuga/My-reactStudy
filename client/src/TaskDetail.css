@@ -1,0 +1,69 @@
+/* TaskDetail.css */
+.task-detail-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  max-width: 500px;
+  /* border: 1px solid #ddd; */
+  border-radius: 8px;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+  /* background-color: #f9f9f9; */
+}
+
+.task-detail-container h2 {
+  margin-top: 0;
+}
+
+.task-detail-container h3 {
+  margin-top: 20px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
+}
+
+.task-detail-container p {
+  margin: 10px 0;
+}
+
+.task-detail-container textarea {
+  width: 95%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.task-detail-container button {
+  padding: 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.task-detail-container button:hover {
+  background-color: #0056b3;
+}
+
+.task-detail-container ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.task-detail-container li {
+  margin-bottom: 10px;
+}
+
+.task-detail-container a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.task-detail-container a:hover {
+  text-decoration: underline;
+}
+
+.task-detail-container input{
+  width:95%;
+  margin-bottom:20px;
+}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './TagForm.css'; // CSS ファイルをインポート
 
 const TagForm = ({ onTagAdded }) => {
   const [tagName, setTagName] = useState('');
@@ -23,20 +24,20 @@ const TagForm = ({ onTagAdded }) => {
   };
 
   return (
-    <div>
-      <h2>Add New Tag</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={tagName}
-          onChange={handleChange}
-          placeholder="Tag Name"
-          required
-        />
-        <button type="submit">Add Tag</button>
-        {error && <p>{error}</p>}
-      </form>
-    </div>
+    <div className="tag-form-container">
+    <h2>Add New Tag</h2>
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        value={tagName}
+        onChange={handleChange}
+        placeholder="Tag Name"
+        required
+      />
+      <button type="submit">Add Tag</button>
+      {error && <p>{error}</p>}
+    </form>
+  </div>
   );
 };
 

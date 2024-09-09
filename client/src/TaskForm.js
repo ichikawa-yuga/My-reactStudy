@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import './TaskForm.css'; // 通常の CSS ファイルをインポート
+
 
 const TaskForm = ({ onSave }) => {
   const [formData, setFormData] = useState({ title: '', description: '', priority: 'low', tags: [] });
@@ -102,44 +104,60 @@ const TaskForm = ({ onSave }) => {
   }
 
   return (
-    <div>
+    <div className="container">
       <h2>{id ? 'Edit Task' : 'Create Task'}</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="Title"
-          required
-        />
-        <input
-          type="text"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Description"
-        />
-        <select
-          name="priority"
-          value={formData.priority}
-          onChange={handleChange}
-          required
-        >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-        <select
-          multiple
-          name="tags"
-          value={formData.tags}
-          onChange={handleTagChange}
-        >
-          {tags.map(tag => (
-            <option key={tag.id} value={tag.id}>{tag.name}</option>
-          ))}
-        </select>
+        <div className="formGroup">
+          <label htmlFor="title">Title</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder="Title"
+            required
+          />
+        </div>
+        <div className="formGroup">
+          <label htmlFor="description">Description</label>
+          <input
+            type="text"
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Description"
+          />
+        </div>
+        <div className="formGroup">
+          <label htmlFor="priority">Priority</label>
+          <select
+            id="priority"
+            name="priority"
+            value={formData.priority}
+            onChange={handleChange}
+            required
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div className="formGroup">
+          <label htmlFor="tags">Tags</label>
+          <select
+            id="tags"
+            name="tags"
+            multiple
+            value={formData.tags}
+            onChange={handleTagChange}
+          >
+            {tags.map(tag => (
+              <option key={tag.id} value={tag.id}>{tag.name}</option>
+            ))}
+          </select>
+        </div>
         <button type="submit">{id ? 'Update' : 'Create'} Task</button>
       </form>
     </div>

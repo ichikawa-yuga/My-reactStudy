@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import TagForm from './TagForm';
+import './TaskList.css';  // CSS ファイルをインポート
+
 
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
@@ -94,44 +96,44 @@ const TaskList = () => {
   };
 
   return (
-    <div>
-      <h2>Task List</h2>
-      <button onClick={sortTasks}>
-        {sorted ? 'Sort by Default' : 'Sort by Priority'}
-      </button>
-      <button onClick={toggleTagForm}>
-        {showTagForm ? 'Cancel' : 'Add Tag'}
-      </button>
-      {showTagForm && <TagForm onTagAdded={handleTagAdded} />}
-      <select onChange={(e) => setSelectedTag(e.target.value)} value={selectedTag}>
-        <option value="">All Tags</option>
-        {tags.map(tag => (
-          <option key={tag.id} value={tag.id}>{tag.name}</option>
-        ))}
-      </select>
-      <ul>
-        {tasks.map(task => (
-          <li key={task.id}>
-            <h3>{task.title}</h3>
-            <p>{task.description}</p>
-            <p>Priority: {task.priority}</p>
-            <p>Tags: {(task.tags || []).join(', ')}</p>
-            <button onClick={() => handleEditClick(task)}>Edit</button>
-            <button onClick={() => handleViewDetails(task)}>View Details</button>
-            <button onClick={() => handleDelete(task.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-      <h3>Tags</h3>
-      <ul>
-        {tags.map(tag => (
-          <li key={tag.id}>
-            {tag.name}
-            <button onClick={() => handleTagDelete(tag.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <div className="task-list-container">
+    <h2>Task List</h2>
+    <button onClick={sortTasks}>
+      {sorted ? 'Sort by Default' : 'Sort by Priority'}
+    </button>
+    <button onClick={toggleTagForm}>
+      {showTagForm ? 'Cancel' : 'Add Tag'}
+    </button>
+    {showTagForm && <TagForm onTagAdded={handleTagAdded} />}
+    <select onChange={(e) => setSelectedTag(e.target.value)} value={selectedTag}>
+      <option value="">All Tags</option>
+      {tags.map(tag => (
+        <option key={tag.id} value={tag.id}>{tag.name}</option>
+      ))}
+    </select>
+    <ul>
+      {tasks.map(task => (
+        <li key={task.id}>
+          <h3>{task.title}</h3>
+          <p>{task.description}</p>
+          <p>Priority: {task.priority}</p>
+          <p>Tags: {(task.tags || []).join(', ')}</p>
+          <button onClick={() => handleEditClick(task)}>Edit</button>
+          <button onClick={() => handleViewDetails(task)}>View Details</button>
+          <button onClick={() => handleDelete(task.id)}>Delete</button>
+        </li>
+      ))}
+    </ul>
+    <h3>Tags</h3>
+    <ul>
+      {tags.map(tag => (
+        <li key={tag.id}>
+          {tag.name}
+          <button onClick={() => handleTagDelete(tag.id)}>Delete</button>
+        </li>
+      ))}
+    </ul>
+  </div>
   );
 };
 
